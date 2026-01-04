@@ -1,2 +1,6 @@
 ami_id = "ami-068c0051b15cdb816"
 instance_type = "t3.micro"
+#key_name = "Flipkart"
+#public_key_path = "Flipkart.pub"
+public_key_path = "C:/Users/HP/.ssh/id_ed25519.pub"
+key_name = "my-deployer-key"

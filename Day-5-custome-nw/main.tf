@@ -10,7 +10,7 @@ resource "aws_subnet" "sn1" {
     vpc_id = aws_vpc.name.id
     cidr_block = "10.0.0.0/24"
     availability_zone = "us-east-1a"
-    #map_public_ip_on_launch = true
+    map_public_ip_on_launch = true
     tags = {
       Name = "Public SN"
     }
@@ -85,6 +85,13 @@ resource "aws_security_group" "pub_sg" {
         protocol    ="TCP"
         cidr_blocks  = ["0.0.0.0/0"]
     }
+    ingress  {
+        description = "All Traffic"
+        from_port   = 0
+        to_port     = 0
+        protocol    ="-1"
+        cidr_blocks  = ["0.0.0.0/0"]
+    }
 
     egress {
         from_port = 0
@@ -95,13 +102,14 @@ resource "aws_security_group" "pub_sg" {
   
 }
 
-#Create the EC2 instance
+#Create the Public EC2 instance
 resource "aws_instance" "name" {
     ami=var.ami_id
     instance_type = var.instance_type
     subnet_id = aws_subnet.sn1.id
     vpc_security_group_ids = [aws_security_group.pub_sg.id]
-    #map_public_ip_on_launch = true
+    #key_name = var.key_name
+    key_name      = aws_key_pair.deployer_key.key_name
 
     tags = {
     Name = "DEV"
@@ -127,4 +135,23 @@ resource "aws_nat_gateway" "nat" {
   # To ensure proper ordering, it is recommended to add an explicit dependency
   # on the Internet Gateway for the VPC.
   depends_on = [aws_internet_gateway.IGW]
+}
+
+resource "aws_instance" "ec2" {
+    ami=var.ami_id
+    instance_type = var.instance_type
+    subnet_id = aws_subnet.sn2.id
+    vpc_security_group_ids = [aws_security_group.pub_sg.id]
+    #key_name = var.key_name
+    key_name      = aws_key_pair.deployer_key.key_name
+
+    tags = {
+    Name = "Private_EC2"
+  }
+}
+
+# Upload the public key to AWS
+resource "aws_key_pair" "deployer_key" {
+  key_name   = var.key_name
+  public_key = file(var.public_key_path)
 }
