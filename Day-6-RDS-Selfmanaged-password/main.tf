@@ -6,14 +6,14 @@ resource "aws_db_instance" "default" {
   engine_version          = "8.0"
   instance_class          = "db.t3.micro"
   username                = "admin"
-  manage_master_user_password = true #rds and secret manager manage this password
-  #password                = "Cloud123"
+  #manage_master_user_password = true #rds and secret manager manage this password
+  password                = "Cloud123"
   db_subnet_group_name    = aws_db_subnet_group.sub-grp.id
   parameter_group_name    = "default.mysql8.0"
 
   # Enable backups and retention
-  #backup_retention_period  = 7   # Retain backups for 7 days
-  #backup_window            = "02:00-03:00" # Daily backup window (UTC)
+  backup_retention_period  = 1   # Retain backups for 7 days
+  backup_window            = "02:00-03:00" # Daily backup window (UTC)
 
   # Enable monitoring (CloudWatch Enhanced Monitoring)
   #monitoring_interval      = 60  # Collect metrics every 60 seconds
@@ -31,6 +31,7 @@ resource "aws_db_instance" "default" {
 
   # Skip final snapshot
   skip_final_snapshot = true
+  apply_immediately = true
   
 }
 
@@ -117,3 +118,19 @@ resource "aws_db_subnet_group" "sub-grp" {
 #     Name = "My DB subnet group"
 #   }
 # }
+
+resource "aws_db_instance" "read_replica" {
+  identifier          = "rds-test-replica"
+  instance_class      = "db.t3.micro"
+
+  replicate_source_db = aws_db_instance.default.arn #if remove this line then the replica become master db
+
+  engine              = "mysql"
+  engine_version      = "8.0"
+
+  publicly_accessible = false
+  apply_immediately   = true
+
+  skip_final_snapshot = true
+  db_subnet_group_name    = aws_db_subnet_group.sub-grp.name
+}
