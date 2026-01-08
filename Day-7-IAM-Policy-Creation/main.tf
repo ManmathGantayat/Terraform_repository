@@ -107,3 +107,8 @@ resource "aws_lambda_permission" "name" {
     source_arn = aws_cloudwatch_event_rule.name.arn
   
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
