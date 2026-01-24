@@ -1,16 +1,36 @@
-node {
-    
-    stage('gitcheckout') { 
-        git branch: 'main', url: 'https://github.com/ManmathGantayat/Terraform_repository.git'
-    }
-    stage('terraform init') {
-        dir('Day-2-statefile'){
-        sh 'terraform init'
+pipeline {
+    agent any
+
+    stages {
+        stage('git checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ManmathGantayat/Terraform_repository.git'
+            }
         }
-    }
-    stage('terraform plan') {
-        dir('Day-2-statefile'){
-        sh 'terraform plan'
+        stage('terraform init') {
+            steps {
+                dir('Day-2-statefile') {
+                    sh 'terraform init'
+                    }
+                
+            }
         }
+        stage('terraform plan') {
+            steps {
+                dir('Day-2-statefile') {
+                    sh 'terraform plan'
+                    }
+                
+            }
+        }
+        stage('terraform apply') {
+            steps {
+                dir('Day-2-statefile') {
+                    sh 'terraform ${action} -auto-approve'
+                    }
+                
+            }
+        }
+        
     }
 }
